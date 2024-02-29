@@ -82,6 +82,7 @@ export class AuthService {
 
     async logout(keyStore: KeyToken) {
         const delKey = await this.keyTokensService.removeKeyById(keyStore._id);
+        console.log(delKey);
         return delKey;
     }
 

@@ -7,8 +7,8 @@ export type KeyTokenDocument = HydratedDocument<KeyToken>;
 
 @Schema({ timestamps: true })
 export class KeyToken {
-    @Prop({ type: Types.ObjectId, required: true })
-    _id: Types.ObjectId;
+    @Transform((value) => value.toString())
+    _id: string;
     
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true })
     user: User;

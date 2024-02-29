@@ -43,8 +43,7 @@ export class KeyTokensService {
     return await this.keyTokenModel.findOne({ user: userId });
   }
 
-  async removeKeyById(id: Types.ObjectId) {
+  async removeKeyById(id: string) {
     return await this.keyTokenModel.findByIdAndDelete(id);
-}
-
+  }
 }

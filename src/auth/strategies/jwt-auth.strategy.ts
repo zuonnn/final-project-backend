@@ -3,7 +3,12 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException, Request } from '@nestjs/common';
 import { KeyTokensService } from 'src/key-tokens/key-tokens.service';
 import { KeyToken } from 'src/key-tokens/schemas/key-token.schema';
-
+declare module '@nestjs/common' {
+  interface Request {
+    keyStore?: KeyToken;
+    headers
+  }
+}
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
@@ -24,6 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
           if (!keyStore) {
             return done(new UnauthorizedException('Key store not found for user.'), null);
           }
+          request.keyStore = keyStore;
         } catch (error) {
           return done(new UnauthorizedException('Error fetching key store.'), null);
         }
