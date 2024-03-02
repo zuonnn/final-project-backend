@@ -9,6 +9,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { UsersModule } from './users/users.module';
 import { KeyTokensModule } from './key-tokens/key-tokens.module';
 import { ProductsModule } from './products/products.module';
+import { DiscountsModule } from './discounts/discounts.module';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { ProductsModule } from './products/products.module';
       ttl: 60,
       limit: 10,
     }]), 
-    AuthModule, UsersModule, KeyTokensModule, ProductsModule
+    AuthModule, UsersModule, KeyTokensModule, ProductsModule, DiscountsModule
 
   ],
   providers: [
