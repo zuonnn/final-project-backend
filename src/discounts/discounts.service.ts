@@ -17,7 +17,7 @@ export class DiscountsService {
         if (foundDiscountCode) {
             throw new BadRequestException('Discount code already exists');
         }
-        
+
         if (new Date() < createDiscountDto.start || new Date() > createDiscountDto.end) {
             throw new BadRequestException('Invalid date range')
         }
@@ -31,7 +31,7 @@ export class DiscountsService {
             minOrderValue: createDiscountDto.minOrderValue || 0,
             productIds: createDiscountDto.applyTo === 'alls' ? [] : createDiscountDto.productIds,
             maxValue: createDiscountDto.maxValue || 0,
-            
+
         });
         return newDiscount.save();
     }
@@ -42,6 +42,10 @@ export class DiscountsService {
 
     async findDiscountById(id: string) {
         return this.discountModel.findById(id).exec();
+    }
+
+    async findDiscountByCode(code: string) {
+        return this.discountModel.findOne({ code }).exec();
     }
 
     async findAllProductsByDiscountCode({
@@ -100,7 +104,7 @@ export class DiscountsService {
         return this.discountModel.findOneAndDelete({ code }).exec();
     }
 
-    async cancelDiscountCode({codeId, userId}) {
+    async cancelDiscountCode({ codeId, userId }) {
         const discount = await this.discountModel.findById(codeId).exec();
         if (!discount) {
             throw new NotFoundException('Discount not found')
@@ -118,7 +122,7 @@ export class DiscountsService {
         return result;
     }
 
-    async applyDiscountToOrder({ code, productIds }) {
+    async applyDiscountToOrder({ code, products, totalPrice, userId }) {
         const discount = await this.discountModel.findOne({ code }).exec();
         if (!discount ||
             !discount.isActive ||
@@ -129,13 +133,43 @@ export class DiscountsService {
             throw new NotFoundException('Discount not found')
         }
 
-        let totalOrder = 0;
-        if (discount.minOrderValue > 0) {
-            totalOrder = productIds.reduce((acc, id) => {
-
-
-            }, 0);
+        //Kiểm tra số lần sử dụng tối đa mỗi user
+        if (discount.maxUsagePerUser) {
+            const usedUser = discount.usedUsers.find(u => u.userId === userId);
+            if (usedUser && usedUser.time >= discount.maxUsagePerUser) {
+                throw new BadRequestException('Discount code has reached max usage')
+            }
         }
+
+        //Kiểm tra số lần sử dụng tối đa
+        if (discount.usedCount >= discount.maxUsage) {
+            throw new BadRequestException('Discount code has reached max usage')
+        }
+
+        //Kiểm tra giá trị đơn hàng tối thiểu
+        if (totalPrice < discount.minOrderValue) {
+            throw new BadRequestException('Order value is too low')
+        }
+
+        //Kiểm tra sản phẩm áp dụng
+        if (discount.applyTo === 'specifics') {
+            const productIds = products.map((p: { productId: any; }) => p.productId);
+            const validProducts = discount.productIds.filter(p => productIds.includes(p));
+            if (validProducts.length !== productIds.length) {
+                throw new BadRequestException('Discount code is not applicable to all products')
+            }
+        }
+
+        //Kiểm tra loại giảm giá
+        let totalDiscount = 0;
+        if (discount.type === 'fixed_amount') {
+            //Kiểm tra giá trị giảm giá không vượt quá giá trị đơn hàng
+            totalDiscount = discount.value > totalPrice ? totalPrice : discount.value;
+        } else if (discount.type === 'percentage') {
+            totalDiscount = totalPrice * discount.value / 100;
+        }
+
+        return totalDiscount;
     }
 
 }

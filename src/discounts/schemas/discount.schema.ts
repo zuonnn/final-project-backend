@@ -40,7 +40,7 @@ export class Discount {
     maxUsagePerUser: number;
 
     @Prop({ default: [] })
-    usedUsers: string[];
+    usedUsers: {userId: string, time: number}[];
 
     @Prop({ default: 0})
     usedCount: number;

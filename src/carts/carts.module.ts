@@ -11,6 +11,7 @@ import { ProductsModule } from 'src/products/products.module';
   imports: [
     MongooseModule.forFeature([{ name: Cart.name, schema: CartSchema }]),
     ProductsModule
-  ]
+  ],
+  exports: [CartsService],
 })
 export class CartsModule {}

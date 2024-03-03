@@ -11,6 +11,7 @@ import { ProductsModule } from 'src/products/products.module';
   imports: [
     MongooseModule.forFeature([{ name: Discount.name, schema: DiscountSchema }]),
     ProductsModule
-  ]
+  ],
+  exports: [DiscountsService]
 })
 export class DiscountsModule {}

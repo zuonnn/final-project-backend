@@ -13,7 +13,7 @@ export class Cart {
     state: string;
 
     @Prop({ required: true, default: []})
-    products: {productId: string, quantity: number}[];
+    products: {productId: string, quantity: number, price: number}[];
 
     @Prop({ required: true, default: 0})
     count : number;

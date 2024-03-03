@@ -11,6 +11,8 @@ import { KeyTokensModule } from './key-tokens/key-tokens.module';
 import { ProductsModule } from './products/products.module';
 import { DiscountsModule } from './discounts/discounts.module';
 import { CartsModule } from './carts/carts.module';
+import { CheckoutsModule } from './checkouts/checkouts.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -28,7 +30,7 @@ import { CartsModule } from './carts/carts.module';
       ttl: 60,
       limit: 10,
     }]), 
-    AuthModule, UsersModule, KeyTokensModule, ProductsModule, DiscountsModule, CartsModule
+    AuthModule, UsersModule, KeyTokensModule, ProductsModule, DiscountsModule, CartsModule, CheckoutsModule, RedisModule
 
   ],
   providers: [
