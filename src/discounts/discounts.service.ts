@@ -65,8 +65,8 @@ export class DiscountsService {
             });
         } else if (discount.applyTo === 'specifics') {
             products = await this.productsService.findAllProduct({
-                limit: +limit,
-                page: +page,
+                limit: +limit || 10,
+                page: +page || 1,
                 sort: 'ctime',
                 select: ['name'],
                 filter: { _id: { $in: discount.productIds } }

@@ -51,7 +51,7 @@ export class Discount {
     @Prop({ default: true})
     isActive: boolean;
 
-    @Prop({ required: true, default: 'all' , enum: ['all', 'specific_products']})
+    @Prop({ required: true, default: 'all' , enum: ['all', 'specifics']})
     applyTo: string;
 
     @Prop({default: []})

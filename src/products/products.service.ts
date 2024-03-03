@@ -50,7 +50,7 @@ export class ProductsService {
     return this.productModel.findOne({ slug }).exec();
   }
 
-  async findOneProduct(id: string): Promise<Product | null> {
+  async findProductById(id: string): Promise<Product | null> {
     return this.productModel.findById(id).exec();
   }
 

@@ -14,7 +14,12 @@ export class DiscountsController {
   }
 
   @Get()
-  findAll(@Req() req: Request) {
+  findAll() {
+    return this.discountsService.findAllDiscounts();
+  }
+
+  @Get('list_products_code')
+  findAllProductsByDiscountCode(@Req() req: Request) {
     const { code, limit, page } = req.query;
     return this.discountsService.findAllProductsByDiscountCode({ code, limit, page});
   }
