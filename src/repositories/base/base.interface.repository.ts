@@ -8,8 +8,11 @@ export interface BaseRepositoryInterface<T> {
     findOneByCondition(condition?: object, projection?: string): Promise<T>;
 
     findAll(
-        condition: object,
+        filter?: object,
         options?: object,
+        limit?: number,
+        page?: number,
+        sort?: object,
     ): Promise<FindAllResponse<T>>;
 
     update(id: string, dto: Partial<T>): Promise<T>;

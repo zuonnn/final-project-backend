@@ -1,4 +1,4 @@
-import { BaseServiceInterface } from 'src/interfaces/base.service.interface';
+import { BaseServiceInterface } from 'src/interfaces/base/base.service.interface';
 import { BaseEntity } from 'src/modules/shared/base.entity';
 import { BaseRepositoryInterface } from 'src/repositories/base/base.interface.repository';
 import {
@@ -20,8 +20,11 @@ export abstract class BaseServiceAbstract<T extends BaseEntity>
     async findAll(
         filter?: object,
         options?: object,
+        limit?: number,
+        page?: number,
+        sort?: SortParams,
     ): Promise<FindAllResponse<T>> {
-        return await this.repository.findAll(filter, options);
+        return await this.repository.findAll(filter, options, limit, page, sort);
     }
     async findOne(id: string) {
         return await this.repository.findOneById(id);

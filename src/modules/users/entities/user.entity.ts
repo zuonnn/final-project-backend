@@ -19,8 +19,8 @@ export class User extends BaseEntity{
     @Prop({ required: true })
     name: string;
 
-    @Prop({ required: true, unique: true, match: /^([+]\d{2})?\d{10}$/ })
-    phone_number: string;
+    @Prop({ required: true, select: false})
+    password: string;
 
     @Prop({
 		match: /^([+]\d{2})?\d{10}$/,
@@ -32,7 +32,7 @@ export class User extends BaseEntity{
 			return `****-***-${last_three_digits}`;
 		},
 	})
-    password: string;
+    phone_number: string;
 
     @Prop({ unique: true })
     email: string;
