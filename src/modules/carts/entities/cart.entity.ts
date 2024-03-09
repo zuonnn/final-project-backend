@@ -1,14 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument} from 'mongoose';
-import { Transform } from 'class-transformer';
+import { BaseEntity } from 'src/modules/shared/base.entity';
 
 export type CartDocument = HydratedDocument<Cart>;
 
-@Schema({ timestamps: true })
-export class Cart {
-    @Transform((value) => value.toString())
-    _id: string;
-
+@Schema({
+	timestamps: {
+		createdAt: 'created_at',
+		updatedAt: 'updated_at',
+	}
+})
+export class Cart extends BaseEntity{
     @Prop({ required: true, default: 'active', enum: ['active', 'completed', 'failed', 'pending']})
     state: string;
 

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { KeyTokensService } from './key-tokens.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { KeyToken, KeyTokenSchema } from './schemas/key-token.schema';
+import { KeyToken, KeyTokenSchema } from './entities/key-token.entity';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({

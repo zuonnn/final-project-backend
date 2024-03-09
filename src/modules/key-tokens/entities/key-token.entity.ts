@@ -2,14 +2,17 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, ObjectId, Types } from 'mongoose';
 import { User } from '../../users/entities/user.entity';
 import { Transform } from 'class-transformer';
+import { BaseEntity } from 'src/modules/shared/base.entity';
 
 export type KeyTokenDocument = HydratedDocument<KeyToken>;
 
-@Schema({ timestamps: true })
-export class KeyToken {
-    @Transform((value) => value.toString())
-    _id: string;
-    
+@Schema({
+	timestamps: {
+		createdAt: 'created_at',
+		updatedAt: 'updated_at',
+	}
+})
+export class KeyToken extends BaseEntity{
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true })
     user: User;
 
@@ -20,10 +23,10 @@ export class KeyToken {
     publicKey: string;
 
     @Prop({type: Array, default: []})
-    refreshTokenUsed: string[];
+    refresh_token_used: string[];
 
     @Prop({type: String, required: true})
-    refreshToken: string;
+    refresh_token: string;
 }
 
 export const KeyTokenSchema = SchemaFactory.createForClass(KeyToken);

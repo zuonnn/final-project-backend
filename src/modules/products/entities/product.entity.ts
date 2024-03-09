@@ -4,7 +4,12 @@ import { BaseEntity } from 'src/modules/shared/base.entity';
 
 export type ProductDocument = HydratedDocument<Product>;
 
-@Schema({ timestamps: true })
+@Schema({
+	timestamps: {
+		createdAt: 'created_at',
+		updatedAt: 'updated_at',
+	}
+})
 export class Product extends BaseEntity {
     @Prop({ required: true })
     name: string;

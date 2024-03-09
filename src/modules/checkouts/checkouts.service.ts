@@ -4,9 +4,9 @@ import { UpdateCheckoutDto } from './dto/update-checkout.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Checkout } from './schemas/checkout.schema';
 import { Model } from 'mongoose';
-import { CartsService } from 'src/carts/carts.service';
-import { ProductsService } from 'src/products/products.service';
-import { DiscountsService } from 'src/discounts/discounts.service';
+import { CartsService } from '../carts/carts.service';
+import { ProductsService } from '../products/products.service';
+import { DiscountsService } from '../discounts/discounts.service';
 
 @Injectable()
 export class CheckoutsService {

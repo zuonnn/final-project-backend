@@ -4,7 +4,12 @@ import { Transform } from 'class-transformer';
 
 export type DiscountDocument = HydratedDocument<Discount>;
 
-@Schema({ timestamps: true })
+@Schema({
+	timestamps: {
+		createdAt: 'created_at',
+		updatedAt: 'updated_at',
+	}
+})
 export class Discount {
     @Transform((value) => value.toString())
     _id: string;

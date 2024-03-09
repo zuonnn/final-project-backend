@@ -15,5 +15,5 @@ export class CreateKeyTokenDto {
 
     @IsNotEmpty()
     @IsString()
-    refreshToken: string;
+    refresh_token: string;
 }

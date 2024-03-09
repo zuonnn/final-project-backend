@@ -1,14 +1,8 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException, Request } from '@nestjs/common';
-import { KeyTokensService } from 'src/key-tokens/key-tokens.service';
-import { KeyToken } from 'src/key-tokens/schemas/key-token.schema';
-declare module '@nestjs/common' {
-  interface Request {
-    keyStore?: KeyToken;
-    headers
-  }
-}
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { KeyToken } from 'src/modules/key-tokens/entities/key-token.entity';
+import { KeyTokensService } from 'src/modules/key-tokens/key-tokens.service';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
@@ -22,14 +16,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         if (!userId) {
           return done(new UnauthorizedException(), null);
         }
-        
+
         let keyStore: KeyToken;
         try {
           keyStore = await this.keysTokenService.findByUserId(userId);
           if (!keyStore) {
             return done(new UnauthorizedException('Key store not found for user.'), null);
           }
-          request.keyStore = keyStore;
+          request['keyStore'] = keyStore;
         } catch (error) {
           return done(new UnauthorizedException('Error fetching key store.'), null);
         }

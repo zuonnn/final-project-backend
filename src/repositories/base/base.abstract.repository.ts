@@ -1,7 +1,7 @@
-import { BaseEntity } from '@modules/shared/base/base.entity';
 import { FilterQuery, Model, QueryOptions } from 'mongoose';
 import { FindAllResponse } from 'src/types/common.type';
 import { BaseRepositoryInterface } from './base.interface.repository';
+import { BaseEntity } from 'src/modules/shared/base.entity';
 
 export abstract class BaseRepositoryAbstract<T extends BaseEntity>
     implements BaseRepositoryInterface<T>
@@ -11,8 +11,8 @@ export abstract class BaseRepositoryAbstract<T extends BaseEntity>
     }
 
     async create(dto: T | any): Promise<T> {
-        const created_data = await this.model.create(dto);
-        return created_data.save();
+        const createdData = await this.model.create(dto);
+        return createdData.toObject();
     }
 
     async findOneById(id: string): Promise<T> {
@@ -33,13 +33,11 @@ export abstract class BaseRepositoryAbstract<T extends BaseEntity>
         condition: FilterQuery<T>,
         options?: QueryOptions<T>,
     ): Promise<FindAllResponse<T>> {
-        const [count, items] = await Promise.all([
-            this.model.count({ ...condition, deleted_at: null }),
-            this.model.find({ ...condition, deleted_at: null }, options?.projection, options),
-        ]);
+        const count = await this.model.countDocuments({ ...condition, deleted_at: null });
+        const items = await this.model.find({ ...condition, deleted_at: null }, options?.projection, options).exec();
         return {
             count,
-            items,
+            items: items.map(item => item.toObject()),
         };
     }
 

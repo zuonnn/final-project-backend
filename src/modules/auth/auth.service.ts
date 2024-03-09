@@ -1,11 +1,12 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { RegisterDto } from './dto/register.dto';
-import { KeyTokensService } from 'src/key-tokens/key-tokens.service';
-import { UsersService } from 'src/users/users.service';
 import { LoginDto } from './dto/login.dto';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
-import { KeyToken } from 'src/key-tokens/schemas/key-token.schema';
+import { UsersService } from '../users/users.service';
+import { KeyTokensService } from '../key-tokens/key-tokens.service';
+import { KeyToken } from '../key-tokens/entities/key-token.entity';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -27,7 +28,7 @@ export class AuthService {
                 userId: newUser._id,
                 publicKey,
                 privateKey,
-                refreshToken: '',
+                refresh_token: '',
             });
             if (!keyStore) {
                 throw new Error('Error saving key token');
@@ -52,7 +53,7 @@ export class AuthService {
             throw new UnauthorizedException();
         }
 
-        const match = await bcrypt.compare(loginDto.password, user.password);
+        const match = await this.verifyPlainContentWithHashedContent(loginDto.password, user.password);
         if (!match) {
             throw new UnauthorizedException();
         }
@@ -68,7 +69,7 @@ export class AuthService {
             userId,
             publicKey,
             privateKey,
-            refreshToken: tokens.refreshToken
+            refresh_token: tokens.refresh_token
         });
 
         return {
@@ -86,4 +87,20 @@ export class AuthService {
         return delKey;
     }
 
+    async getAuthenticatedUser(email: string, password: string): Promise<User> {
+        try {
+            const user = await this.usersService.findByEmail(email);
+            const match = await this.verifyPlainContentWithHashedContent(password, user.password);
+            if (!match) {
+                throw new BadRequestException('Wrong credentials!!');
+            }
+            return user;
+        } catch (error) {
+            throw new BadRequestException('Wrong credentials!!');
+        }
+    }
+    
+    private async verifyPlainContentWithHashedContent(plain_text: string, hashed_text: string,) : Promise<boolean>{
+        return await bcrypt.compare(plain_text, hashed_text);
+    }
 }

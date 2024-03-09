@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateKeyTokenDto } from './dto/create-key-token.dto';
-import { KeyToken } from './schemas/key-token.schema';
+import { KeyToken } from './entities/key-token.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId, Types } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
@@ -18,8 +18,8 @@ export class KeyTokensService {
       const update = {
         publicKey: createKeyTokenDto.publicKey,
         privateKey: createKeyTokenDto.privateKey,
-        refreshTokenUsed: [],
-        refreshToken: createKeyTokenDto.refreshToken
+        refresh_token_used: [],
+        refresh_token: createKeyTokenDto.refresh_token
       };
       const options = { upsert: true, new: true };
       const tokens = await this.keyTokenModel.findOneAndUpdate(filter, update, options);
@@ -32,8 +32,8 @@ export class KeyTokensService {
   async createTokenPair(payload: object, publicKey: string, privateKey: string) {
     try {
       const accessToken = this.jwtService.sign(payload, { secret: publicKey, expiresIn: '1h' });
-      const refreshToken = this.jwtService.sign(payload, { secret: privateKey, expiresIn: '7d' });
-      return { accessToken, refreshToken };
+      const refresh_token = this.jwtService.sign(payload, { secret: privateKey, expiresIn: '7d' });
+      return { accessToken, refresh_token };
     } catch (error) {
       throw new Error('Error creating token pair: ' + error.message);
     }
