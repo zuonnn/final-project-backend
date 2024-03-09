@@ -1,18 +1,17 @@
 import { Module, ValidationPipe } from '@nestjs/common';
-import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { MorganInterceptor, MorganModule } from 'nest-morgan';
-import { AuthModule } from './auth/auth.module';
-import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AppService } from './app.service';
+import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { UsersModule } from './users/users.module';
-import { KeyTokensModule } from './key-tokens/key-tokens.module';
-import { ProductsModule } from './products/products.module';
-import { DiscountsModule } from './discounts/discounts.module';
-import { CartsModule } from './carts/carts.module';
-import { CheckoutsModule } from './checkouts/checkouts.module';
-import { RedisModule } from './redis/redis.module';
+import { MorganInterceptor, MorganModule } from 'nest-morgan';
+import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
+import { KeyTokensModule } from './modules/key-tokens/key-tokens.module';
+import { ProductsModule } from './modules/products/products.module';
+import { DiscountsModule } from './modules/discounts/discounts.module';
+import { CartsModule } from './modules/carts/carts.module';
+import { CheckoutsModule } from './modules/checkouts/checkouts.module';
+import { RedisModule } from './modules/redis/redis.module';
 
 @Module({
   imports: [
@@ -30,7 +29,8 @@ import { RedisModule } from './redis/redis.module';
       ttl: 60,
       limit: 10,
     }]), 
-    AuthModule, UsersModule, KeyTokensModule, ProductsModule, DiscountsModule, CartsModule, CheckoutsModule, RedisModule
+    AuthModule, UsersModule, KeyTokensModule, ProductsModule, DiscountsModule, CartsModule, CheckoutsModule, RedisModule,
+    
 
   ],
   providers: [
@@ -41,8 +41,7 @@ import { RedisModule } from './redis/redis.module';
     {
       provide: APP_PIPE,
       useClass: ValidationPipe,
-    },
-    AppService,
+    }
   ]
 })
 export class AppModule {}
