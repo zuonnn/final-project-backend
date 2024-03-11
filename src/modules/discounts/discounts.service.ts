@@ -1,19 +1,23 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateDiscountDto } from './dto/create-discount.dto';
-import { InjectModel } from '@nestjs/mongoose';
-import { Discount, DiscountDocument } from './schemas/discount.schema';
-import { Model } from 'mongoose';
+import { Discount } from './entities/discount.entity';
 import { UpdateDiscountDto } from './dto/update-discount.dto';
+import { Product } from '../products/entities/product.entity';
+import { BaseServiceAbstract } from 'src/base/abstracts/base.service.abstract';
+import { DiscountRepositoryInterface } from './interfaces/discount.interface';
 import { ProductsService } from '../products/products.service';
 
 @Injectable()
-export class DiscountsService {
+export class DiscountsService extends BaseServiceAbstract<Discount>{
     constructor(
-        @InjectModel(Discount.name) private discountModel: Model<Discount>,
-        private productsService: ProductsService
-    ) { }
+        @Inject('DiscountsRepositoryInterface') private readonly discountRepository: DiscountRepositoryInterface,
+        private readonly productsService: ProductsService
+    ) {
+        super(discountRepository);
+
+    }
     async createDiscount(createDiscountDto: CreateDiscountDto) {
-        const foundDiscountCode = await this.discountModel.findOne({ code: createDiscountDto.code }).exec();
+        const foundDiscountCode = await this.discountRepository.findOneByCondition({ code: createDiscountDto.code })
         if (foundDiscountCode) {
             throw new BadRequestException('Discount code already exists');
         }
@@ -26,26 +30,18 @@ export class DiscountsService {
             throw new BadRequestException('Invalid date range')
         }
 
-        const newDiscount = new this.discountModel({
+        const newDiscount = await this.discountRepository.create({
             ...createDiscountDto,
-            minOrderValue: createDiscountDto.minOrderValue || 0,
-            productIds: createDiscountDto.applyTo === 'alls' ? [] : createDiscountDto.productIds,
-            maxValue: createDiscountDto.maxValue || 0,
+            min_order_value: createDiscountDto.min_order_value || 0,
+            product_ids: createDiscountDto.apply_to === 'alls' ? [] : createDiscountDto.product_ids,
+            max_value: createDiscountDto.max_value || 0,
 
         });
-        return newDiscount.save();
-    }
-
-    async findAllDiscounts() {
-        return this.discountModel.find().exec();
-    }
-
-    async findDiscountById(id: string) {
-        return this.discountModel.findById(id).exec();
+        return newDiscount;
     }
 
     async findDiscountByCode(code: string) {
-        return this.discountModel.findOne({ code }).exec();
+        return this.discountRepository.findOneByCondition({ code });
     }
 
     async findAllProductsByDiscountCode({
@@ -53,13 +49,13 @@ export class DiscountsService {
         limit,
         page
     }) {
-        const discount = await this.discountModel.findOne({ code }).exec();
-        if (!discount || discount.isActive === false) {
+        const discount = await this.discountRepository.findOneByCondition({ code });
+        if (!discount || discount.is_active === false) {
             throw new NotFoundException('Discount not found')
         }
 
-        let products = [];
-        if (discount.applyTo === 'alls') {
+        let products: Product[];
+        if (discount.apply_to === 'alls') {
             products = await this.productsService.findAllProduct({
                 limit: +limit || 10,
                 page: +page || 1,
@@ -67,13 +63,13 @@ export class DiscountsService {
                 select: ['name'],
                 filter: {}
             });
-        } else if (discount.applyTo === 'specifics') {
+        } else if (discount.apply_to === 'specifics') {
             products = await this.productsService.findAllProduct({
                 limit: +limit || 10,
                 page: +page || 1,
                 sort: 'ctime',
                 select: ['name'],
-                filter: { _id: { $in: discount.productIds } }
+                filter: { _id: { $in: discount.product_ids } }
             });
         }
         return products;
@@ -88,74 +84,51 @@ export class DiscountsService {
             throw new BadRequestException('Invalid date range')
         }
 
-        const foundDiscount = await this.discountModel.findOne({ code: updateDiscountDto.code });
+        const foundDiscount = await this.discountRepository.findOneByCondition({ code: updateDiscountDto.code });
         if (foundDiscount && foundDiscount._id.toString() !== id) {
             throw new BadRequestException('Discount code already exists')
         }
 
-        return this.discountModel.findByIdAndUpdate(id, updateDiscountDto, { new: true }).exec();
-    }
-
-    async deleteDiscountById(id: string) {
-        return this.discountModel.findByIdAndDelete(id).exec();
-    }
-
-    async deleteDiscountByCode(code: string) {
-        return this.discountModel.findOneAndDelete({ code }).exec();
-    }
-
-    async cancelDiscountCode({ codeId, userId }) {
-        const discount = await this.discountModel.findById(codeId).exec();
-        if (!discount) {
-            throw new NotFoundException('Discount not found')
-        }
-
-        const result = await this.discountModel.findByIdAndUpdate(discount._id, {
-            $pull: {
-                usedUsers: userId
-            },
-            $inc: {
-                usedCount: -1
-            }
-        }).exec();
-
-        return result;
+        return this.discountRepository.update(id, updateDiscountDto);
     }
 
     async applyDiscountToOrder({ code, products, totalPrice, userId }) {
-        const discount = await this.discountModel.findOne({ code }).exec();
-        if (!discount ||
-            !discount.isActive ||
+        const discount = await this.discountRepository.findOneByCondition({ code });
+        if (!discount) {
+            throw new NotFoundException('Discount not found!');
+        }
+
+        if (
+            !discount.is_active ||
             new Date() < discount.start ||
-            new Date() > discount.end ||
-            !discount.maxUsage
+            new Date() > discount.end
         ) {
-            throw new NotFoundException('Discount not found')
+            throw new BadRequestException('Discount has expired!');
         }
 
         //Kiểm tra số lần sử dụng tối đa mỗi user
-        if (discount.maxUsagePerUser) {
-            const usedUser = discount.usedUsers.find(u => u.userId === userId);
-            if (usedUser && usedUser.time >= discount.maxUsagePerUser) {
-                throw new BadRequestException('Discount code has reached max usage')
+        if (discount.max_usage_per_user) {
+            const usedUser = discount.used_users.find(u => u.userId === userId);
+            if (usedUser && usedUser.time >= discount.max_usage_per_user) {
+                throw new BadRequestException('Discount code has reached max usage!');
             }
         }
 
         //Kiểm tra số lần sử dụng tối đa
-        if (discount.usedCount >= discount.maxUsage) {
-            throw new BadRequestException('Discount code has reached max usage')
+        if (discount.used_count >= discount.max_usage) {
+            throw new BadRequestException('Discount code has reached max usage!');
         }
 
         //Kiểm tra giá trị đơn hàng tối thiểu
-        if (totalPrice < discount.minOrderValue) {
-            throw new BadRequestException('Order value is too low')
+        if (totalPrice < discount.min_order_value) {
+            throw new BadRequestException('Order value is too low!');
         }
 
         //Kiểm tra sản phẩm áp dụng
-        if (discount.applyTo === 'specifics') {
-            const productIds = products.map((p: { productId: any; }) => p.productId);
-            const validProducts = discount.productIds.filter(p => productIds.includes(p));
-            if (validProducts.length !== productIds.length) {
+        if (discount.apply_to === 'specifics') {
+            const product_ids = products.map((p: { productId: any; }) => p.productId);
+            const validProducts = discount.product_ids.filter(p => product_ids.includes(p));
+            if (validProducts.length !== product_ids.length) {
                 throw new BadRequestException('Discount code is not applicable to all products')
             }
         }
@@ -170,6 +143,14 @@ export class DiscountsService {
         }
 
         return totalDiscount;
+    }
+
+    async cancelDiscountCode({ codeId, userId }) {
+        const discount = await this.discountRepository.findOneById(codeId);
+        if (!discount) {
+            throw new NotFoundException('Discount not found')
+        }
+        return await this.discountRepository.findByIdAndUpdate(codeId, userId);
     }
 
 }

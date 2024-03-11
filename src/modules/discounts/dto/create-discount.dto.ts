@@ -1,4 +1,5 @@
-import { IsDate, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import mongoose from "mongoose";
 
 export class CreateDiscountDto {
     @IsNotEmpty()
@@ -9,7 +10,7 @@ export class CreateDiscountDto {
     @IsString()
     description: string;
 
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
     type: string;
 
@@ -19,7 +20,7 @@ export class CreateDiscountDto {
 
     @IsOptional()
     @IsNumber()
-    maxValue: number;
+    max_value: number;
 
     @IsNotEmpty()
     @IsString()
@@ -33,30 +34,30 @@ export class CreateDiscountDto {
 
     @IsNotEmpty()
     @IsNumber()
-    maxUsage: number;
+    max_usage: number;
 
     @IsNotEmpty()
     @IsNumber()
-    maxUsagePerUser: number;
+    max_usage_per_user: number;
 
     @IsOptional()
-    usedUsers: string[];
+    used_users?: {userId: mongoose.Schema.Types.ObjectId, time: number}[];
 
     @IsOptional()
     @IsNumber()
-    usedCount: number;
+    used_count: number;
 
     @IsNotEmpty()
     @IsNumber()
-    minOrderValue: number;
+    min_order_value: number;
 
     @IsOptional()
-    isActive: boolean;
+    is_active: boolean;
 
     @IsNotEmpty()
     @IsString()
-    applyTo: string;
+    apply_to: string;
 
     @IsOptional()
-    productIds: string[];
+    product_ids: mongoose.Schema.Types.ObjectId[];
 }

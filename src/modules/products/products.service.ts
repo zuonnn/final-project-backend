@@ -1,77 +1,45 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, SortOrder } from 'mongoose';
+import { BaseServiceAbstract } from 'src/base/abstracts/base.service.abstract';
+import { ProductRepositoryInterface } from 'src/modules/products/interfaces/product.interface';
+import { InventoriesService } from '../inventories/inventories.service';
 
 @Injectable()
-export class ProductsService {
-  constructor(@InjectModel(Product.name) private productModel: Model<Product>) { }
+export class ProductsService extends BaseServiceAbstract<Product>{
+  constructor(
+    @Inject('ProductsRepositoryInterface') private readonly productRepository: ProductRepositoryInterface,
+    private readonly inventoriesService: InventoriesService
+  ) {
+    super(productRepository);
+
+  }
 
   async createProduct(createProductDto: CreateProductDto): Promise<Product> {
     const slug = createProductDto.name.toLowerCase().split(' ').join('-');
-    const createdProduct = new this.productModel({
+    const createdProduct = await this.productRepository.create({
       ...createProductDto,
-      slug,
+      slug
     });
-    return createdProduct.save();
+    if (createdProduct) {
+      await this.inventoriesService.insertProductToInventory({
+        product_id: createdProduct._id,
+        stock: createProductDto.quantity,
+      })
+    }
+    return createdProduct;
   }
 
-
-  async findAllProduct({ limit, sort, page, select, filter }): Promise<Product[]> {
-    const skip = (page - 1) * limit;
-    let sortBy: Record<string, SortOrder> = {};
-
-    if (sort) {
-      if (sort === 'ctime') {
-        sortBy.createdAt = -1;
-      } else {
-        const [key, order] = sort.split('_');
-        sortBy[key] = order === 'desc' ? -1 : 1;
-      }
-    } else {
-      sortBy.createdAt = -1;
-    }
-
-    const selectFields = Object.fromEntries(select.map((field) => [field, 1]));
-
-    const products = await this.productModel
-      .find(filter)
-      .sort(sortBy)
-      .skip(skip)
-      .limit(limit)
-      .select(selectFields)
-      .exec();
-    return products;
+  async findAllProduct({ filter, limit, sort, page, select }): Promise<Product[]> {
+    const selectFields = select ? select.split(',').join(' ') : '';
+    return await this.productRepository.findAllProduct({ filter, limit, sort, page, select: selectFields });
   }
 
   async findBySlug(slug: string): Promise<Product | null> {
-    return this.productModel.findOne({ slug }).exec();
+    return this.productRepository.findOneByCondition({ slug });
   }
 
-  async findProductById(id: string): Promise<Product | null> {
-    return this.productModel.findById(id).exec();
-  }
-
-  async updateProduct(id: string, updateProductDto: UpdateProductDto): Promise<Product | null> {
-    const existingProduct = await this.productModel.findById(id).exec();
-
-    if (!existingProduct) {
-      throw new NotFoundException(`Product with ID ${id} not found`);
-    }
-
-    existingProduct.set(updateProductDto);
-    return existingProduct.save();
-  }
-
-  async removeProduct(id: string): Promise<Product | null> {
-    const deletedProduct = await this.productModel.findByIdAndDelete(id).exec();
-
-    if (!deletedProduct) {
-      throw new NotFoundException(`Product with ID ${id} not found`);
-    }
-
-    return deletedProduct;
+  async searchProduct(keySearch: string): Promise<Product[]> {
+    return await this.productRepository.searchByName(keySearch);
   }
 }

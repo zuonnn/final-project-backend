@@ -4,7 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { RegisterDto } from '../auth/dto/register.dto';
 import { Role } from './enums/role.enum';
 import { UserRepositoryInterface } from './interfaces/user.interface';
-import { BaseServiceAbstract } from 'src/abstracts/base/base.service.abstract';
+import { BaseServiceAbstract } from 'src/base/abstracts/base.service.abstract';
 
 @Injectable()
 export class UsersService extends BaseServiceAbstract<User>{
@@ -17,7 +17,7 @@ export class UsersService extends BaseServiceAbstract<User>{
 
     async findByEmail(email: string): Promise<User | undefined> {
         try {
-            const user = await this.userRepository.findByEmail(email);
+            const user = await this.userRepository.findOneByCondition({ email });
             if (!user) {
                 throw new NotFoundException('User with this email does not exist');
             }
@@ -29,7 +29,7 @@ export class UsersService extends BaseServiceAbstract<User>{
 
     async create(registerDto: RegisterDto): Promise<User> {
         try {
-            const userInDb = await this.userRepository.findByEmail(registerDto.email);
+            const userInDb = await this.userRepository.findOneByCondition({email: registerDto.email});
             if (userInDb) {
                 throw new BadRequestException('User already exists');
             }

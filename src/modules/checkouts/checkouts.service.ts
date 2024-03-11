@@ -7,6 +7,7 @@ import { Model } from 'mongoose';
 import { CartsService } from '../carts/carts.service';
 import { ProductsService } from '../products/products.service';
 import { DiscountsService } from '../discounts/discounts.service';
+import { Product } from '../products/entities/product.entity';
 
 @Injectable()
 export class CheckoutsService {
@@ -37,11 +38,11 @@ export class CheckoutsService {
       discount: 0,
       totalCheckout: 0
     }
-    let productDescription;
+    let productDescription: Product;
     //Tính tổng giá sản phẩm
     for (const product of cart.products) {
       //Kiểm tra sản phẩm có tồn tại không
-      productDescription = await this.productService.findProductById(product.productId);
+      productDescription = await this.productService.findOne(product.productId);
       if (!productDescription) throw new NotFoundException('Product not found');
 
       //Tính tổng giá sản phẩm

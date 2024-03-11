@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { BaseEntity } from 'src/modules/shared/base.entity';
+import { BaseEntity } from 'src/base/entities/base.entity';
 
 export type ProductDocument = HydratedDocument<Product>;
 
@@ -25,9 +25,6 @@ export class Product extends BaseEntity {
 
     @Prop({ required: true })
     price: number;
-
-    @Prop({ required: true })
-    quantity: number;
 
     @Prop({ required: true, enum: ['electronics', 'clothing'] })
     type: string;

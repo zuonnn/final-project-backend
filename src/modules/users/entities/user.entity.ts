@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, ObjectId } from 'mongoose';
 import { Role } from '../enums/role.enum';
-import { BaseEntity } from 'src/modules/shared/base.entity';
+import { BaseEntity } from 'src/base/entities/base.entity';
 import { Address, AddressSchema } from './address.entity';
 
 export type UserDocument = HydratedDocument<User>;
@@ -19,7 +19,7 @@ export class User extends BaseEntity{
     @Prop({ required: true })
     name: string;
 
-    @Prop({ required: true, select: false})
+    @Prop({ required: true })
     password: string;
 
     @Prop({

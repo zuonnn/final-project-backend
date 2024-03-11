@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import { DiscountsService } from './discounts.service';
 import { CreateDiscountDto } from './dto/create-discount.dto';
 import { Request } from 'express';
@@ -15,7 +15,7 @@ export class DiscountsController {
 
   @Get()
   findAll() {
-    return this.discountsService.findAllDiscounts();
+    return this.discountsService.findAll();
   }
 
   @Get('list_products_code')
@@ -26,7 +26,7 @@ export class DiscountsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.discountsService.findDiscountById(id);
+    return this.discountsService.findOne(id);
   }
 
   @Patch(':id')
@@ -36,6 +36,11 @@ export class DiscountsController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.discountsService.deleteDiscountById(id);
+    return this.discountsService.remove(id);
+  }
+
+  @Post('applyDiscountToOrder')
+  applyDiscountToOrder(@Body() body: { code: string; products: any[]; totalPrice: number; userId: string }) {
+    return this.discountsService.applyDiscountToOrder(body);
   }
 }

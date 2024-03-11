@@ -52,8 +52,9 @@ export class AuthService {
         if (!user) {
             throw new UnauthorizedException();
         }
-
-        const match = await this.verifyPlainContentWithHashedContent(loginDto.password, user.password);
+        console.log(user.password);
+        console.log(loginDto.password);
+        const match = await bcrypt.compare(loginDto.password, user.password);
         if (!match) {
             throw new UnauthorizedException();
         }
@@ -85,22 +86,5 @@ export class AuthService {
         const delKey = await this.keyTokensService.removeKeyById(keyStore._id);
         console.log(delKey);
         return delKey;
-    }
-
-    async getAuthenticatedUser(email: string, password: string): Promise<User> {
-        try {
-            const user = await this.usersService.findByEmail(email);
-            const match = await this.verifyPlainContentWithHashedContent(password, user.password);
-            if (!match) {
-                throw new BadRequestException('Wrong credentials!!');
-            }
-            return user;
-        } catch (error) {
-            throw new BadRequestException('Wrong credentials!!');
-        }
-    }
-    
-    private async verifyPlainContentWithHashedContent(plain_text: string, hashed_text: string,) : Promise<boolean>{
-        return await bcrypt.compare(plain_text, hashed_text);
     }
 }
