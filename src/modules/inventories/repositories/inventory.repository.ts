@@ -11,9 +11,9 @@ export class InventoriesRepository
     implements InventoryRepositoryInterface {
     constructor(
         @InjectModel(Inventory.name)
-        private readonly inventories_repository: Model<Inventory>,
+        private readonly inventoryModel: Model<Inventory>,
     ) {
-        super(inventories_repository);
+        super(inventoryModel);
     }
 
 }

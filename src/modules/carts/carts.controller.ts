@@ -1,20 +1,30 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Param, Delete, Patch, Get } from '@nestjs/common';
 import { CartsService } from './carts.service';
-import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
+import { ProductData } from './interfaces/product-data.interface';
+import mongoose from 'mongoose';
+import { CartDto } from './dto/create-cart.dto';
 
 @Controller('carts')
 export class CartsController {
-  constructor(private readonly cartsService: CartsService) {}
+  constructor(private readonly cartsService: CartsService) { }
 
-  @Post()
-  addToCart(@Body() {userId, product}) {
-    return this.cartsService.addProductToCart({userId, product});
+  @Post('add')
+  addToCart(@Body() cartDto: CartDto) {
+    return this.cartsService.addToCart(cartDto);
   }
 
-  @Delete()
-  removeFromCart(@Body() {userId, productId}) {
-    return this.cartsService.removeProductFromCart({userId, productId});
+  @Get('increase')
+  increaseProductQuantity(@Body() cartDto: CartDto) {
+    return this.cartsService.increaseProductQuantity(cartDto);
   }
-  
+
+  @Get('decrease')
+  decreaseProductQuantity(@Body() cartDto: CartDto) {
+    return this.cartsService.decreaseProductQuantity(cartDto);
+  }
+
+  @Delete('remove')
+  removeProductFromCart(@Body() cartDto: CartDto) {
+    return this.cartsService.removeProductFromCart(cartDto);
+  }
 }

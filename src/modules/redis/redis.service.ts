@@ -10,7 +10,7 @@ export class RedisService {
         private productService: ProductsService
     ) {}
 
-    async aquireLock({productId, quantity, cartId}) {
+    async aquireLock({productId, quantity, cart_id}) {
         const key = `lock_v2024_${productId}`;
         const retryTimes = 10;
         const expireTime = 3000; //3 seconds

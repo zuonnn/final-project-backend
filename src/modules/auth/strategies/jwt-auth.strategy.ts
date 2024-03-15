@@ -12,14 +12,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKeyProvider: async (request: Request, rawJwtToken: string, done: (err: any, secretOrKey?: string) => void) => {
-        const userId = request.headers['x-client-id'];
-        if (!userId) {
+        const user_id = request.headers['x-client-id'];
+        if (!user_id) {
           return done(new UnauthorizedException(), null);
         }
 
         let keyStore: KeyToken;
         try {
-          keyStore = await this.keysTokenService.findByUserId(userId);
+          keyStore = await this.keysTokenService.findByuser_id(user_id);
           if (!keyStore) {
             return done(new UnauthorizedException('Key store not found for user.'), null);
           }
@@ -34,6 +34,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any, request: Request) {
-    return { userId: payload.userId, roles: payload.roles };
+    return { user_id: payload.user_id, roles: payload.roles };
   }
 }

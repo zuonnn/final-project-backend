@@ -23,7 +23,7 @@ export class Address extends BaseEntity {
     country: string;
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
-	user: User;
+	user_id: User;
 }
 
 export const AddressSchema = SchemaFactory.createForClass(Address);

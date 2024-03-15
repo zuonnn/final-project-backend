@@ -17,8 +17,8 @@ export class DiscountsService extends BaseServiceAbstract<Discount>{
 
     }
     async createDiscount(createDiscountDto: CreateDiscountDto) {
-        const foundDiscountCode = await this.discountRepository.findOneByCondition({ code: createDiscountDto.code })
-        if (foundDiscountCode) {
+        const founddiscount_code = await this.discountRepository.findOneByCondition({ code: createDiscountDto.code })
+        if (founddiscount_code) {
             throw new BadRequestException('Discount code already exists');
         }
 
@@ -44,7 +44,7 @@ export class DiscountsService extends BaseServiceAbstract<Discount>{
         return this.discountRepository.findOneByCondition({ code });
     }
 
-    async findAllProductsByDiscountCode({
+    async findAllProductsBydiscount_code({
         code,
         limit,
         page
@@ -92,7 +92,7 @@ export class DiscountsService extends BaseServiceAbstract<Discount>{
         return this.discountRepository.update(id, updateDiscountDto);
     }
 
-    async applyDiscountToOrder({ code, products, totalPrice, userId }) {
+    async applyDiscountToOrder({ code, products, total_price, user_id }) {
         const discount = await this.discountRepository.findOneByCondition({ code });
         if (!discount) {
             throw new NotFoundException('Discount not found!');
@@ -108,7 +108,7 @@ export class DiscountsService extends BaseServiceAbstract<Discount>{
 
         //Kiểm tra số lần sử dụng tối đa mỗi user
         if (discount.max_usage_per_user) {
-            const usedUser = discount.used_users.find(u => u.userId === userId);
+            const usedUser = discount.used_users.find(u => u.user_id === user_id);
             if (usedUser && usedUser.time >= discount.max_usage_per_user) {
                 throw new BadRequestException('Discount code has reached max usage!');
             }
@@ -120,7 +120,7 @@ export class DiscountsService extends BaseServiceAbstract<Discount>{
         }
 
         //Kiểm tra giá trị đơn hàng tối thiểu
-        if (totalPrice < discount.min_order_value) {
+        if (total_price < discount.min_order_value) {
             throw new BadRequestException('Order value is too low!');
         }
 
@@ -137,20 +137,20 @@ export class DiscountsService extends BaseServiceAbstract<Discount>{
         let totalDiscount = 0;
         if (discount.type === 'fixed_amount') {
             //Kiểm tra giá trị giảm giá không vượt quá giá trị đơn hàng
-            totalDiscount = discount.value > totalPrice ? totalPrice : discount.value;
+            totalDiscount = discount.value > total_price ? total_price : discount.value;
         } else if (discount.type === 'percentage') {
-            totalDiscount = totalPrice * discount.value / 100;
+            totalDiscount = total_price * discount.value / 100;
         }
 
         return totalDiscount;
     }
 
-    async cancelDiscountCode({ codeId, userId }) {
+    async canceldiscount_code({ codeId, user_id }) {
         const discount = await this.discountRepository.findOneById(codeId);
         if (!discount) {
             throw new NotFoundException('Discount not found')
         }
-        return await this.discountRepository.findByIdAndUpdate(codeId, userId);
+        return await this.discountRepository.findByIdAndUpdate(codeId, user_id);
     }
 
 }

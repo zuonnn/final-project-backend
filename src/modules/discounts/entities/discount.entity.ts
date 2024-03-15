@@ -41,9 +41,8 @@ export class Discount extends BaseEntity {
     @Prop({ required: true })
     max_usage_per_user: number;//Số lần sử dụng tối đa mỗi user
 
-    @Prop({ type: [{ _id: false, userId: mongoose.Schema.Types.ObjectId, time: Number }], default: [] })
-    used_users: { userId: mongoose.Schema.Types.ObjectId, time: number }[];
-
+    @Prop({ type: [{ _id: false, user_id: mongoose.Schema.Types.ObjectId, time: Number }], default: [] })
+    used_users: { user_id: mongoose.Schema.Types.ObjectId, time: number }[];
 
     @Prop({ default: 0 })
     used_count: number;//Số lần đã sử dụng

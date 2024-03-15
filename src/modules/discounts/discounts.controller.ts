@@ -19,9 +19,9 @@ export class DiscountsController {
   }
 
   @Get('list_products_code')
-  findAllProductsByDiscountCode(@Req() req: Request) {
+  findAllProductsBydiscount_code(@Req() req: Request) {
     const { code, limit, page } = req.query;
-    return this.discountsService.findAllProductsByDiscountCode({ code, limit, page});
+    return this.discountsService.findAllProductsBydiscount_code({ code, limit, page});
   }
 
   @Get(':id')
@@ -40,7 +40,7 @@ export class DiscountsController {
   }
 
   @Post('applyDiscountToOrder')
-  applyDiscountToOrder(@Body() body: { code: string; products: any[]; totalPrice: number; userId: string }) {
-    return this.discountsService.applyDiscountToOrder(body);
+  applyDiscountToOrder(@Body() { code, products, total_price, user_id }) {
+    return this.discountsService.applyDiscountToOrder({ code, products, total_price, user_id });
   }
 }

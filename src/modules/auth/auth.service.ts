@@ -25,7 +25,7 @@ export class AuthService {
             const privateKey = crypto.randomBytes(64).toString('hex');
             const publicKey = crypto.randomBytes(64).toString('hex');
             const keyStore = await this.keyTokensService.createKeyToken({
-                userId: newUser._id,
+                user_id: newUser._id,
                 publicKey,
                 privateKey,
                 refresh_token: '',
@@ -34,7 +34,7 @@ export class AuthService {
                 throw new Error('Error saving key token');
             }
 
-            const tokens = await this.keyTokensService.createTokenPair({ userId: newUser._id, email: newUser.email }, publicKey, privateKey);
+            const tokens = await this.keyTokensService.createTokenPair({ user_id: newUser._id, email: newUser.email }, publicKey, privateKey);
 
             return {
                 metadata: {
@@ -62,12 +62,12 @@ export class AuthService {
         const privateKey = crypto.randomBytes(64).toString('hex');
         const publicKey = crypto.randomBytes(64).toString('hex');
 
-        const { _id: userId, roles: roles } = user;
+        const { _id: user_id, roles: roles } = user;
 
-        const tokens = await this.keyTokensService.createTokenPair({ userId, roles }, publicKey, privateKey);
+        const tokens = await this.keyTokensService.createTokenPair({ user_id, roles }, publicKey, privateKey);
 
         await this.keyTokensService.createKeyToken({
-            userId,
+            user_id,
             publicKey,
             privateKey,
             refresh_token: tokens.refresh_token
@@ -75,7 +75,7 @@ export class AuthService {
 
         return {
             metadata: {
-                userId,
+                user_id,
                 roles,
                 tokens
             }

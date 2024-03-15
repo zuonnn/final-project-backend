@@ -41,7 +41,7 @@ export class CreateDiscountDto {
     max_usage_per_user: number;
 
     @IsOptional()
-    used_users?: {userId: mongoose.Schema.Types.ObjectId, time: number}[];
+    used_users?: {user_id: mongoose.Schema.Types.ObjectId, time: number}[];
 
     @IsOptional()
     @IsNumber()

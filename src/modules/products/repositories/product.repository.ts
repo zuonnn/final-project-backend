@@ -11,15 +11,15 @@ export class ProductsRepository
     implements ProductRepositoryInterface {
     constructor(
         @InjectModel(Product.name)
-        private readonly products_repository: Model<Product>,
+        private readonly productModel: Model<Product>,
     ) {
-        super(products_repository);
+        super(productModel);
     }
 
     async findAllProduct({ limit, sort, page, filter, select }): Promise<Product[]> {
         const skip = (page - 1) * limit;
         const sortBy: string | { [key: string]: SortOrder | { $meta: any } } = sort === 'ctime' ? { _id: -1 } : { _id: 1 };
-        const products = await this.products_repository.find(filter)
+        const products = await this.productModel.find(filter)
             .sort(sortBy)
             .limit(limit)
             .skip(skip)
@@ -28,7 +28,7 @@ export class ProductsRepository
     }
 
     async searchByName(name: string): Promise<Product[]> {
-        const products = await this.products_repository.find({ name: new RegExp(name, 'i') });
+        const products = await this.productModel.find({ name: new RegExp(name, 'i') });
         return products;
     }
 }

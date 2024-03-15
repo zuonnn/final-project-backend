@@ -3,5 +3,5 @@ import { Discount } from "../entities/discount.entity";
 
 
 export interface DiscountRepositoryInterface extends BaseRepositoryInterface<Discount> {
-    findByIdAndUpdate(id: string, userId: string): Promise<Discount>;
+    findByIdAndUpdate(id: string, user_id: string): Promise<Discount>;
 }

@@ -11,14 +11,14 @@ export class DiscountsRepository
     implements DiscountRepositoryInterface {
     constructor(
         @InjectModel(Discount.name)
-        private readonly discounts_repository: Model<Discount>,
+        private readonly discountModel: Model<Discount>,
     ) {
-        super(discounts_repository);
+        super(discountModel);
     }
-    async findByIdAndUpdate(id: string, userId: string): Promise<Discount> {
-        return await this.discounts_repository.findByIdAndUpdate(id, {
+    async findByIdAndUpdate(id: string, user_id: string): Promise<Discount> {
+        return await this.discountModel.findByIdAndUpdate(id, {
             $pull: {
-                used_users: userId
+                used_users: user_id
             },
             $inc: {
                 max_usage: 1,

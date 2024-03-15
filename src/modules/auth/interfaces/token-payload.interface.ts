@@ -1,4 +1,4 @@
 interface TokenPayload {
-    userId: string;
+    user_id: string;
     roles: string[];
 }

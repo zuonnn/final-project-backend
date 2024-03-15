@@ -12,12 +12,12 @@ export class UsersRepository
 {
     constructor(
         @InjectModel(User.name)
-        private readonly users_repository: Model<User>,
+        private readonly userModel: Model<User>,
     ) {
-        super(users_repository);
+        super(userModel);
     }
 
     findByEmail(email: string): Promise<User> {
-        return this.users_repository.findOne({ email}).exec();
+        return this.userModel.findOne({ email}).exec();
     }
 }

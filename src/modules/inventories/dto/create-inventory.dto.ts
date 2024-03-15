@@ -10,5 +10,5 @@ export class CreateInventoryDto {
     stock: number;
 
     @IsOptional()
-    reservations?: {cartId: string, stock: number, created_on: Date}[];
+    reservations?: {cart_id: string, stock: number, created_on: Date}[];
 }

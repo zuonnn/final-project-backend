@@ -14,7 +14,7 @@ export class KeyTokensService {
 
   async createKeyToken(createKeyTokenDto: CreateKeyTokenDto): Promise<string | null> {
     try {
-      const filter = { user: createKeyTokenDto.userId };
+      const filter = { user: createKeyTokenDto.user_id };
       const update = {
         publicKey: createKeyTokenDto.publicKey,
         privateKey: createKeyTokenDto.privateKey,
@@ -39,8 +39,8 @@ export class KeyTokensService {
     }
   }
 
-  async findByUserId(userId: ObjectId): Promise<KeyToken | null> {
-    return await this.keyTokenModel.findOne({ user: userId });
+  async findByuser_id(user_id: ObjectId): Promise<KeyToken | null> {
+    return await this.keyTokenModel.findOne({ user: user_id });
   }
 
   async removeKeyById(id: string) {

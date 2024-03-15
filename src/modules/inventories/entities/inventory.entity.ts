@@ -19,7 +19,7 @@ export class Inventory extends BaseEntity {
     stock: number;
 
     @Prop({ type: Array, required: true, default: []})
-    reservations?: {cartId: ObjectId, stock: number, created_on: Date}[];
+    reservations?: {cart_id: ObjectId, stock: number, created_on: Date}[];
 }
 
 export const InventorySchema = SchemaFactory.createForClass(Inventory);

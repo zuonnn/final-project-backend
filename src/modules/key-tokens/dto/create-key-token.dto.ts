@@ -3,7 +3,7 @@ import { IsNotEmpty, IsString } from "class-validator";
 export class CreateKeyTokenDto {
     @IsNotEmpty()
     @IsString()
-    userId: string;
+    user_id: string;
 
     @IsNotEmpty()
     @IsString()
