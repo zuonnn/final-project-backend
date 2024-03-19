@@ -1,7 +1,7 @@
 import { BaseRepositoryInterface } from "src/base/repositories/base.interface.repository";
-import { Checkout } from "../entities/checkout.entity";
+import { Order } from "../entities/order.entity";
 
 
-export interface CheckoutRepositoryInterface extends BaseRepositoryInterface<Checkout> {
+export interface CheckoutRepositoryInterface extends BaseRepositoryInterface<Order> {
     
 }

@@ -1,19 +1,45 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
-import { Cache } from 'cache-manager';
-import { ProductsService } from '../products/products.service';
-
+import { InventoryRepositoryInterface } from '../inventories/interfaces/inventory.interface';
+import { RedisConnectionService } from './redis-connection.service';
 @Injectable()
 export class RedisService {
-    constructor (
-        @Inject(CACHE_MANAGER) private cacheManager: Cache,
-        private productService: ProductsService
-    ) {}
+    constructor(
+        private readonly redisConnectionService: RedisConnectionService,
+        @Inject('InventoriesRepositoryInterface') private readonly inventoriesRepository: InventoryRepositoryInterface,
+    ) { }
+    redisClient = this.redisConnectionService.getClient(); 
 
-    async aquireLock({productId, quantity, cart_id}) {
-        const key = `lock_v2024_${productId}`;
+    async aquireLock({ product_id, quantity, cart_id }) {
+
+        const key = `lock_v2024_${product_id}`;
         const retryTimes = 10;
-        const expireTime = 3000; //3 seconds
+        const expireTime = 3000; // 3 seconds
+    
+        for (let i = 0; i < retryTimes; i++) {
+            // const result = await setnx(key, expireTime);
+            const result = await this.redisClient.setnx(key, expireTime);
+            if (result === 1) {
+                const isReservation = await this.inventoriesRepository.reservationInventory({ product_id, quantity, cart_id });
+                if (isReservation.modifiedCount) {
+                    await this.redisClient.pexpire(key, expireTime);
+                    return key;
+                }
+                return null;
+            } else {
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+        }
+    }    
+
+    async releaseLock(key: any) {
+        await this.redisClient.del(key);
     }
 
+    async setKeyValue() {
+        const result = await this.redisClient.hset('hash_key', 'hashtest', 'some value');
+        if (result === 1) {
+            return 'Key set';
+        }
+        return 'Key already exists';
+    }
 }

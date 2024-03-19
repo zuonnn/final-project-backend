@@ -11,12 +11,19 @@ export class InventoriesService extends BaseServiceAbstract<Inventory>{
   ) {
     super(inventoriesRepository);
   }
-  async insertProductToInventory(createInventoryDto: CreateInventoryDto) {
+  async addProductToInventory(createInventoryDto: CreateInventoryDto) {
     const inventory = await this.inventoriesRepository.create(createInventoryDto);
     return inventory;
   }
 
   async findByProductId(product_id: string) {
     return this.inventoriesRepository.findOneByCondition({ product_id });
+  }
+
+  async addStockToProduct(product_id: string, quantity: number) {
+    const inventory = await this.findByProductId(product_id);
+    if (!inventory) return;
+    inventory.stock += quantity;
+    await this.inventoriesRepository.update(inventory._id, inventory);
   }
 }

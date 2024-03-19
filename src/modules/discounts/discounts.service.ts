@@ -126,7 +126,7 @@ export class DiscountsService extends BaseServiceAbstract<Discount>{
 
         //Kiểm tra sản phẩm áp dụng
         if (discount.apply_to === 'specifics') {
-            const product_ids = products.map((p: { productId: any; }) => p.productId);
+            const product_ids = products.map((p: { product_id: any; }) => p.product_id);
             const validProducts = discount.product_ids.filter(p => product_ids.includes(p));
             if (validProducts.length !== product_ids.length) {
                 throw new BadRequestException('Discount code is not applicable to all products')

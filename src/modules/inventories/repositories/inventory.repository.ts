@@ -15,5 +15,14 @@ export class InventoriesRepository
     ) {
         super(inventoryModel);
     }
-
+    async reservationInventory({ product_id, quantity, cart_id }) {
+        const query = {
+            product_id,
+            stock: { $gte: quantity },
+        }, updateSet = {
+            $inc : { stock: -quantity },
+            $push: { reservations: { cart_id, quantity, create_on: new Date() } },
+        }, options = {upsert: true, new: true}
+        return await this.inventoryModel.updateOne(query, updateSet, options)
+    }
 }

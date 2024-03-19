@@ -12,6 +12,9 @@ import { InventoriesRepository } from './repositories/inventory.repository';
     { provide: 'InventoriesRepositoryInterface', useClass: InventoriesRepository }
   ],
   imports: [MongooseModule.forFeature([{ name: Inventory.name, schema: InventorySchema }])],
-  exports: [InventoriesService]
+  exports: [
+    InventoriesService, 
+    { provide: 'InventoriesRepositoryInterface', useClass: InventoriesRepository }
+  ]
 })
 export class InventoriesModule {}

@@ -22,7 +22,7 @@ export class ProductsService extends BaseServiceAbstract<Product>{
       slug
     });
     if (createdProduct) {
-      await this.inventoriesService.insertProductToInventory({
+      await this.inventoriesService.addProductToInventory({
         product_id: createdProduct._id,
         stock: createProductDto.quantity,
       })

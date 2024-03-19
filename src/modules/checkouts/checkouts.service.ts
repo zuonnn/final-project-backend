@@ -2,7 +2,6 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCheckoutDto } from './dto/create-checkout.dto';
 import { UpdateCheckoutDto } from './dto/update-checkout.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Checkout } from './entities/checkout.entity';
 import { Model } from 'mongoose';
 import { CartsService } from '../carts/carts.service';
 import { ProductsService } from '../products/products.service';
@@ -10,14 +9,17 @@ import { DiscountsService } from '../discounts/discounts.service';
 import { Product } from '../products/entities/product.entity';
 import { BaseServiceAbstract } from 'src/base/abstracts/base.service.abstract';
 import { CheckoutRepositoryInterface } from './interfaces/checkout.interface';
+import { RedisService } from '../redis/redis.service';
+import { Order } from './entities/order.entity';
 
 @Injectable()
-export class CheckoutsService extends BaseServiceAbstract<Checkout>{
+export class CheckoutsService extends BaseServiceAbstract<Order>{
   constructor(
     @Inject('CheckoutsRepositoryInterface') private readonly checkoutRepository: CheckoutRepositoryInterface,
     private cartsService: CartsService,
     private productService: ProductsService,
-    private discountsService: DiscountsService
+    private discountsService: DiscountsService,
+    private redisService: RedisService,
   ) {
     super(checkoutRepository);
   }
@@ -70,12 +72,73 @@ export class CheckoutsService extends BaseServiceAbstract<Checkout>{
     user_payment = {},
     discount_code,
   }) {
-    const {order,  products} = await this.checkoutReview({
+    const {order, products} = await this.checkoutReview({
       cart_id,
       user_id,
       discount_code
     })
     console.log("Order" + order);
     console.log("Products" + products);
+    
+    const acquireProduct = [];
+    for (let i = 0; i < products.length; i++) {
+      const { product_id, quantity } = products[i];
+      const keyLock = await this.redisService.aquireLock({ product_id, quantity, cart_id });
+      acquireProduct.push(keyLock ? true : false);
+      if (keyLock) {
+        await this.redisService.releaseLock(keyLock);
+      }
+    }
+
+    if (acquireProduct.includes(false)) {
+      throw new NotFoundException('Some product is updated, please try again');
+    }
+
+    const newOrder = await this.checkoutRepository.create({
+      user_id,
+      checkout_info: {
+        total_price: order.total_price,
+        discount: order.discount,
+        fee_ship: order.fee_ship,
+        total_checkout: order.total_checkout
+      },
+      shipping_info: user_address,
+      payment_info: user_payment,
+      products,
+    });
+
+    
+    if (newOrder) {
+      let product = {};
+      //remove product from cart
+      for (let i = 0; i < products.length; i++) {
+        product = {
+          product_id: products[i].product_id,
+          quantity: products[i].quantity
+        }
+        await this.cartsService.removeProductFromCart({ user_id, product });
+      }
+    }
   }
+
+  async getOrdersByUser(user_id: string) {
+    return this.checkoutRepository.findAll({ user_id })
+  }
+
+  async getOneOrderByUser(user_id: string) {
+    return this.checkoutRepository.findOneByCondition({ user_id })
+  }
+
+  async getOrderById(order_id: string) {
+    return this.checkoutRepository.findOneByCondition({ _id: order_id })
+  }
+
+  async updateOrderStatus(order_id: string, status: string) {
+    return this.checkoutRepository.update(order_id, { status })
+  }
+
+  async cancelOrder(order_id: string) {
+    return this.checkoutRepository.update(order_id, { status: 'cancelled' })
+  }
+
 }
