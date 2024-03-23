@@ -1,3 +1,4 @@
+import { QueryOptions } from 'mongoose';
 import { FindAllResponse } from 'src/types/common.type';
 
 export interface BaseRepositoryInterface<T> {

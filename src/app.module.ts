@@ -12,6 +12,7 @@ import { DiscountsModule } from './modules/discounts/discounts.module';
 import { CartsModule } from './modules/carts/carts.module';
 import { CheckoutsModule } from './modules/checkouts/checkouts.module';
 import { RedisModule } from './modules/redis/redis.module';
+import { CommentsModule } from './modules/comments/comments.module';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { RedisModule } from './modules/redis/redis.module';
       ttl: 60,
       limit: 10,
     }]), 
-    AuthModule, UsersModule, KeyTokensModule, ProductsModule, DiscountsModule, CartsModule, CheckoutsModule, RedisModule,
+    AuthModule, UsersModule, KeyTokensModule, ProductsModule, DiscountsModule, CartsModule, CheckoutsModule, RedisModule, CommentsModule
     
 
   ],
