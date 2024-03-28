@@ -6,12 +6,14 @@ import { Product } from '../products/entities/product.entity';
 import { BaseServiceAbstract } from 'src/base/abstracts/base.service.abstract';
 import { DiscountRepositoryInterface } from './interfaces/discount.interface';
 import { ProductsService } from '../products/products.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class DiscountsService extends BaseServiceAbstract<Discount>{
     constructor(
         @Inject('DiscountsRepositoryInterface') private readonly discountRepository: DiscountRepositoryInterface,
-        private readonly productsService: ProductsService
+        private readonly productsService: ProductsService,
+        private readonly notificationsService: NotificationsService
     ) {
         super(discountRepository);
 
@@ -37,6 +39,14 @@ export class DiscountsService extends BaseServiceAbstract<Discount>{
             max_value: createDiscountDto.max_value || 0,
 
         });
+
+        if (newDiscount) {
+            await this.notificationsService.pushNotification({
+                noti_type: 'PROMOTION-001',
+                noti_receiver: 'all',
+                noti_sender: 'system',
+            });
+        }
         return newDiscount;
     }
 

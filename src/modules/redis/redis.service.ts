@@ -36,7 +36,7 @@ export class RedisService {
     }
 
     async setKeyValue() {
-        const result = await this.redisClient.hset('hash_key', 'hashtest', 'some value');
+        const result = await this.redisClient.hset('hash_key1111', 'hashtest', 'some value');
         if (result === 1) {
             return 'Key set';
         }

@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, ObjectId, Types } from 'mongoose';
 import { User } from '../../users/entities/user.entity';
-import { Transform } from 'class-transformer';
 import { BaseEntity } from 'src/base/entities/base.entity';
 
 export type KeyTokenDocument = HydratedDocument<KeyToken>;
